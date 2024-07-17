@@ -904,6 +904,7 @@ cc_library(
     ],
 )
 
+
 cc_library(
     name = "variable_op_kernels",
     srcs = VARIABLE_KERNEL_SRCS,
@@ -1941,10 +1942,11 @@ cc_test(
         ":test_main",
         ":test_util",
         "//tensorflow/lite/core/c:common",
+        "//tensorflow/core/platform:byte_order",
         "//tensorflow/lite/schema:schema_fbs",
         "@com_google_googletest//:gtest",
         "@flatbuffers",
-    ],
+    ]
 )
 
 cc_test(
