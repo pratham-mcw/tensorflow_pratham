@@ -107,6 +107,7 @@ union OperatorOptions {
   AbsOptions,
   DotGeneralOptions,
   ResizeBilinearOptions,
+  StablehloRoundNearestAfzOptions,
 }
 
 table DotOptions {
@@ -236,6 +237,9 @@ table DotGeneralOptions {
 table ResizeBilinearOptions {
   align_corners: bool;
   half_pixel_centers: bool;
+}
+
+table StablehloRoundNearestAfzOptions {
 }
 
 table Operator {

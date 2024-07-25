@@ -216,6 +216,7 @@ TfLiteRegistration* Register_STABLEHLO_MINIMUM();
 TfLiteRegistration*
 Register_STABLEHLO_RESHAPE();  // WARNING: not implemented, using this op will
                                // crash the runtime
+
 TfLiteRegistration*
 Register_STABLEHLO_CLAMP();  // WARNING: not implemented, using this op will
                              // crash the runtime
@@ -325,6 +326,9 @@ TfLiteRegistration* Register_REDUCE_WINDOW();
 TfLiteRegistration*
 Register_STABLEHLO_COMPOSITE();  // WARNING: not implemented, using this
                                  // op will crash the runtime
+
+TfLiteRegistration* Register_STABLEHLO_ROUND_NEAREST_AFZ();
+
 }  // namespace builtin
 }  // namespace ops
 }  // namespace tflite

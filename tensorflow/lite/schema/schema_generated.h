@@ -1221,7 +1221,8 @@ enum BuiltinOperator : int32_t {
   BuiltinOperator_REDUCE_WINDOW = 205,
   BuiltinOperator_STABLEHLO_COMPOSITE = 206,
   BuiltinOperator_MIN = BuiltinOperator_ADD,
-  BuiltinOperator_MAX = BuiltinOperator_STABLEHLO_COMPOSITE
+  BuiltinOperator_MAX = BuiltinOperator_STABLEHLO_COMPOSITE,
+  BuiltinOperator_STABLEHLO_ROUND_NEAREST_AFZ = 210,
 };
 
 inline const BuiltinOperator (&EnumValuesBuiltinOperator())[207] {
@@ -1432,7 +1433,8 @@ inline const BuiltinOperator (&EnumValuesBuiltinOperator())[207] {
     BuiltinOperator_DILATE,
     BuiltinOperator_STABLEHLO_RNG_BIT_GENERATOR,
     BuiltinOperator_REDUCE_WINDOW,
-    BuiltinOperator_STABLEHLO_COMPOSITE
+    BuiltinOperator_STABLEHLO_COMPOSITE,
+    BuiltinOperator_STABLEHLO_ROUND_NEAREST_AFZ,
   };
   return values;
 }
@@ -1646,6 +1648,7 @@ inline const char * const *EnumNamesBuiltinOperator() {
     "STABLEHLO_RNG_BIT_GENERATOR",
     "REDUCE_WINDOW",
     "STABLEHLO_COMPOSITE",
+    "STABLEHLO_ROUND_NEAREST_AFZ"
     nullptr
   };
   return names;
