@@ -450,7 +450,7 @@ TfLiteStatus ParseStablehloComposite(const Operator* op,
                                      BuiltinDataAllocator* allocator,
                                      void** builtin_data);
                                      
-TfliteStatus ParseStablehloRoundNearestAfz(const Operator* op,
+TfLiteStatus ParseStablehloRoundNearestAfz(const Operator* op,
                                  ErrorReporter* error_reporter,
                                  BuiltinDataAllocator* allocator,
                                  void** builtin_data);

@@ -776,6 +776,9 @@ table StablehloScatterOptions {
   update_computation_subgraph_index: int;
 }
 
+table StablehloRoundNearestAfzOptions{
+}
+
 enum RngAlgorithm : byte {
   // An algorithm auto-selected by the system according to device type.
   DEFAULT = 0,
@@ -1497,9 +1500,6 @@ table StableHLOCompositeOptions {
   composite_attributes:[ubyte];
   composite_attributes_format:CustomOptionsFormat;
   version:int32;
-}
-
-table StablehloRoundNearestAfzOptions {
 }
 
 // An operator takes tensors as inputs and outputs. The type of operation being
