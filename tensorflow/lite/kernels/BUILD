@@ -1362,20 +1362,6 @@ cc_test(
 )
 
 cc_test(
-    name = "stablehlo_round_test",
-    srcs = ["stablehlo_round_test.cc"],
-    tags = ["tflite_nnapi"],
-    deps = [
-        ":test_main",
-        ":test_util",
-        "//tensorflow/lite/schema:schema_fbs",
-        "//tensorflow/lite/c:common",
-        "//tensorflow/lite/c:c_api_types",
-        "@com_google_googletest//:gtest",
-    ],
-)
-
-cc_test(
     name = "stablehlo_round_nearest_afz_test",
     srcs = ["stablehlo_round_nearest_afz_test.cc"],
     tags = ["tflite_nnapi"],
