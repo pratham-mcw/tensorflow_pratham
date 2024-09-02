@@ -70,45 +70,34 @@ TfLiteStatus AllocateTemporaryTensorsIfRequired(TfLiteContext* context,
 }
 
 template <typename T>
-TfLiteStatus EvalImpl(const TfLiteTensor* operand, TfLiteTensor* result) {
-  const int num_elements = NumElements(result);
-  const T* input = GetTensorData<T>(operand);
-  T* output = GetTensorData<T>(result);
+TfLiteStatus EvalImpl(const TfLiteTensor* input, TfLiteTensor* output) {
+  const int num_elements = NumElements(output);
+  const T* input_data = GetTensorData<T>(input);
+  T* output_data = GetTensorData<T>(output);
   for (int i = 0; i < num_elements; ++i) {
-    output[i] = T(std::round(input[i]));
+    output_data[i] = T(std::round(input_data[i]));
   }
   return kTfLiteOk;
 }
 
 template <typename T>
-TfLiteStatus EvalRoundNearestAFZQuantized(TfLiteContext* context, TfLiteNode* node,
-                                OpData* data, const TfLiteTensor* input,
-                                TfLiteTensor* output) {
-  TfLiteTensor* dequantized_input_tensor;
-  TF_LITE_ENSURE_OK(
-      context, GetTemporarySafe(context, node, data->input_dequantized_index,
-                                &dequantized_input_tensor));
-  
-  TfLiteTensor* dequantized_output_tensor;
-  TF_LITE_ENSURE_OK(
-      context, GetTemporarySafe(context, node, data->output_dequantized_index,
-                                &dequantized_output_tensor));
-
-  dequantize::DequantizeImpl<dequantize::KernelType::kGenericOptimized>(
-      context, node, input, dequantized_input_tensor);
-
-  TF_LITE_ENSURE_OK(context, EvalImpl<float>(dequantized_input_tensor,
-                                             dequantized_output_tensor));
-
-  RuntimeShape output_shape(GetTensorShape(output));
-  RuntimeShape dequantized_output_shape(GetTensorShape(dequantized_output_tensor));
-  tflite::QuantizationParams op_params;
-  op_params.zero_point = output->params.zero_point;
-  op_params.scale = output->params.scale;
-  optimized_ops::AffineQuantize<T>(
-      op_params, dequantized_output_shape,
-      GetTensorData<float>(dequantized_output_tensor), output_shape,
-      GetTensorData<T>(output));
+TfLiteStatus EvalRoundNearestAFZQuantized(TfLiteContext* context,
+                                          TfLiteNode* node, OpData* data,
+                                          const TfLiteTensor* input,
+                                          TfLiteTensor* output) {
+  const double scale = input->params.scale;
+  const int32_t zero_point = input->params.zero_point;
+  const int num_elements = NumElements(output);
+  const T* input_buffer = GetTensorData<T>(input);
+  T* output_buffer = GetTensorData<T>(output);
+  for (int i = 0; i < num_elements; ++i) {
+    float dequantized_value = (input_buffer[i] - zero_point) * scale;
+    float rounded_value = std::round(dequantized_value);
+    int32_t quantized_value = static_cast<int32_t>(std::round(rounded_value / scale)) + zero_point;
+    quantized_value = std::min(std::max(quantized_value, static_cast<int32_t>(std::numeric_limits<T>::min())),
+                               static_cast<int32_t>(std::numeric_limits<T>::max()));
+    output_buffer[i] = static_cast<T>(quantized_value);
+  }
   return TfLiteStatus::kTfLiteOk;
 }
 
@@ -116,12 +105,15 @@ TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node) {
   OpData* data = reinterpret_cast<OpData*>(node->user_data);
   TF_LITE_ENSURE_EQ(context, NumInputs(node), 1);
   TF_LITE_ENSURE_EQ(context, NumOutputs(node), 1);
+
   const TfLiteTensor* input;
   TF_LITE_ENSURE_OK(context, GetInputSafe(context, node, kInputTensor, &input));
   TfLiteTensor* output;
   TF_LITE_ENSURE_OK(context,
                     GetOutputSafe(context, node, kOutputTensor, &output));
+
   TF_LITE_ENSURE_TYPES_EQ(context, input->type, output->type);
+  TF_LITE_ENSURE_EQ(context,HaveSameShapes(input,output),1);
   TF_LITE_ENSURE(context, input->type == kTfLiteFloat32 ||
                               input->type == kTfLiteBFloat16 ||
                               input->type == kTfLiteFloat16 ||
@@ -148,8 +140,6 @@ TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node) {
     TF_LITE_ENSURE(context, output_params->zero_point->size > 0);
 
     if (input->type == kTfLiteInt16) {
-      // In case of int16, quantization is symmetic and
-      // zero point should be zero.
       TF_LITE_ENSURE_EQ(context, input->params.zero_point, 0);
       TF_LITE_ENSURE_EQ(context, output->params.zero_point, 0);
     }
@@ -157,8 +147,6 @@ TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node) {
   TF_LITE_ENSURE_STATUS(
       AllocateTemporaryTensorsIfRequired(context, node, is_quantized));
 
-  output->type = input->type;
-  TfLiteIntArray* output_size = TfLiteIntArrayCopy(input->dims);
   if (is_quantized) {
     node->temporaries->data[data->input_dequantized_index] =
         data->input_dequantized_id;

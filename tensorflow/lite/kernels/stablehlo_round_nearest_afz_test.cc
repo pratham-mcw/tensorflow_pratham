@@ -53,7 +53,7 @@ class RoundNearestAfzOpModel : public SingleOpModel {
 
 TEST(StablehloRoundTest, RoundFloat32) {
   RoundNearestAfzOpModel model({TensorType_FLOAT32, {1, 5}},
-                               {TensorType_FLOAT32, {}});
+                               {TensorType_FLOAT32, {1, 5}});
   model.PopulateTensor<float>(model.input(), {-2.5f, 0.4f, 0.5f, 0.6f, 2.5f});
   ASSERT_EQ(model.Invoke(), kTfLiteOk);
   EXPECT_THAT(model.GetOutput<float>(),
@@ -62,7 +62,7 @@ TEST(StablehloRoundTest, RoundFloat32) {
 
 TEST(StablehloRoundTest, RoundFloat16) {
   RoundNearestAfzOpModel model({TensorType_FLOAT16, {1, 5}},
-                               {TensorType_FLOAT16, {}});
+                               {TensorType_FLOAT16, {1, 5}});
   model.PopulateTensor<Eigen::half>(
       model.input(), {Eigen::half(-3.644530e+00), Eigen::half(-1.992190e+00),
                       Eigen::half(-1.826170e+00), Eigen::half(3.039060e+00),
@@ -77,7 +77,7 @@ TEST(StablehloRoundTest, RoundFloat16) {
 
 TEST(StablehloRoundTest, RoundBFloat16) {
   RoundNearestAfzOpModel model({TensorType_BFLOAT16, {1, 5}},
-                               {TensorType_BFLOAT16, {}});
+                               {TensorType_BFLOAT16, {1, 5}});
   model.PopulateTensor<Eigen::bfloat16>(
       model.input(),
       {Eigen::bfloat16(3.500000e+00), Eigen::bfloat16(-6.437500e+00),
@@ -130,7 +130,7 @@ void QuantizedTestsNoActivation() {
   std::vector<float> result = {-6.0, -5.0, 0, 1.0, 4.0, 6.0};
 
   QuantizedRoundOpModel model({tensor_type, {6}, -7.0, 7.0},
-                             {tensor_type, {}, -7.0, 7.0});
+                             {tensor_type, {6}, -7.0, 7.0});
   model.QuantizeAndPopulate<integer_dtype>(model.input(), input);
   ASSERT_EQ(model.Invoke(), kTfLiteOk);
   EXPECT_THAT(model.GetDequantizedOutput<integer_dtype>(),
