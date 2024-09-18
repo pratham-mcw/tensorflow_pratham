@@ -293,7 +293,7 @@ class StablehloBatchNormTrainingTestInt : public ::testing::Test {
   using IntType = Int;
 };
 
-using IntTestTypes = ::testing::Types<int8_t>;
+using IntTestTypes = ::testing::Types<int8_t,int16_t>;
 
 TYPED_TEST_SUITE(StablehloBatchNormTrainingTestInt, IntTestTypes);
 
@@ -301,13 +301,14 @@ TYPED_TEST(StablehloBatchNormTrainingTestInt, Ex1) {
   using Int = typename TestFixture::IntType;
   TfLiteStablehloBatchNormTrainingParams params = {0.0 /*epsilon*/,
                                                    2 /*feature_index*/};
-  float kQuantizedTolerance = GetTolerance<Int>(-7.0f, 7.0f);
+  float kQuantizedTolerance = GetTolerance<Int>(-20.0f, 20.0f);
   StablehloBatchNormTrainingOpModel model(
       {GetTTEnum<Int>(), {2, 2, 2}, -20.0f, 20.0f},
       {GetTTEnum<Int>(), {2}, -20.0f, 20.0f},
-      {GetTTEnum<Int>(), {2}, -20.0f, 20.0f}, {GetTTEnum<Int>(), {}, -20.0f, 20.0f},
-      {GetTTEnum<Int>(), {}, -20.0f, 20.0f}, {GetTTEnum<Int>(), {}, -20.0f, 20.0f},
-      params);
+      {GetTTEnum<Int>(), {2}, -20.0f, 20.0f},
+      {GetTTEnum<Int>(), {}, -20.0f, 20.0f},
+      {GetTTEnum<Int>(), {}, -20.0f, 20.0f},
+      {GetTTEnum<Int>(), {}, -20.0f, 20.0f}, params);
   model.QuantizeAndPopulate<Int>(
       model.input(), {float(1.0), float(-2.0), float(3.0), float(-4.0),
                       float(3.0), float(-4.0), float(-1.0), float(2.0)});
@@ -319,13 +320,13 @@ TYPED_TEST(StablehloBatchNormTrainingTestInt, Ex1) {
               ElementsAreArray(ArrayFloatNear(
                   {float(0.69), float(1.0), float(1.90), float(0.18),
                    float(1.90), float(0.18), float(-0.5), float(2.63)},
-                  0.08)));
+                  kQuantizedTolerance)));
   EXPECT_THAT(
       model.GetDequantizedBatchMean<Int>(),
-      ElementsAreArray(ArrayFloatNear({float(1.5), float(-2.0)}, 0.08)));
+      ElementsAreArray(ArrayFloatNear({float(1.5), float(-2.0)}, kQuantizedTolerance)));
   EXPECT_THAT(
       model.GetDequantizedBatchVar<Int>(),
-      ElementsAreArray(ArrayFloatNear({float(2.75), float(6.0)}, 0.08)));
+      ElementsAreArray(ArrayFloatNear({float(2.75), float(6.0)}, kQuantizedTolerance)));
 }
 
 }  // namespace

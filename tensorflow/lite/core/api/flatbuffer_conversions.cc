@@ -925,10 +925,9 @@ TfLiteStatus ParseOpDataTfLite(const Operator* op, BuiltinOperator op_type,
       return ParseStablehloComposite(op, error_reporter, allocator,
                                      builtin_data);
     }
-
     case BuiltinOperator_STABLEHLO_BATCH_NORM_TRAINING: {
       return ParseStablehloBatchNormTraining(op, error_reporter, allocator,
-                                     builtin_data);
+                                             builtin_data);
     }
     // TODO: skip param parsing for now since ops below don't have kernels
     case BuiltinOperator_STABLEHLO_SLICE:
@@ -2420,8 +2419,10 @@ TfLiteStatus ParseStablehloBatchNormTraining(const Operator* op,
                                              BuiltinDataAllocator* allocator,
                                              void** builtin_data) {
   CheckParsePointerParams(op, error_reporter, allocator, builtin_data);
+
   SafeBuiltinDataAllocator safe_allocator(allocator);
-  auto params = safe_allocator.Allocate<TfLiteStablehloBatchNormTrainingParams>();
+  auto params =
+      safe_allocator.Allocate<TfLiteStablehloBatchNormTrainingParams>();
   const StablehloBatchNormTrainingOptions* schema_params =
       op->builtin_options_2_as_StablehloBatchNormTrainingOptions();
   if (schema_params) {
@@ -2430,8 +2431,9 @@ TfLiteStatus ParseStablehloBatchNormTraining(const Operator* op,
     *builtin_data = params.release();
     return kTfLiteOk;
   }
-  TF_LITE_REPORT_ERROR(error_reporter,
-                       "Could not get 'stablehlo.batch_norm_training' operation parameters.");
+  TF_LITE_REPORT_ERROR(
+      error_reporter,
+      "Could not get 'stablehlo.batch_norm_training' operation parameters.");
   return kTfLiteError;
 }
 
